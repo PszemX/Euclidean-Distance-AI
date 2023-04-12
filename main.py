@@ -10,4 +10,5 @@ Wypiszę też takie mniej-więcej zasady jak mamy korzystać z pushowania kodu o
 oraz żebyśmy również pogłębili wiedzę i praktykę z korzystania w systemie git + scrum.
 """
 
+print("Zmiana");
 print("Hello World!")
