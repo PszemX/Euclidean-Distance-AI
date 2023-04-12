@@ -9,6 +9,6 @@ Stworzę jeszcze później stronę, gdzie będziemy zadania pisali sobie, co jes
 Wypiszę też takie mniej-więcej zasady jak mamy korzystać z pushowania kodu oraz robienia zadań, żeby praca była najefektywniejsza
 oraz żebyśmy również pogłębili wiedzę i praktykę z korzystania w systemie git + scrum.
 """
-
-print("Zmiana");
+print("Zmiana")
+print("Zmiana 2")
 print("Hello World!")
