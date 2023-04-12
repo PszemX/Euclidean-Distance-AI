@@ -11,4 +11,5 @@ oraz żebyśmy również pogłębili wiedzę i praktykę z korzystania w systemi
 """
 print("Zmiana")
 print("Zmiana 2")
+print("Zmiana3")
 print("Hello World!")
