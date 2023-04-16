@@ -37,9 +37,13 @@ class Generator:
         
         # Wybór rodzaju operacji i wykonanie jej.
         if type == "substractionAB":
-            results = self.substract([np.flip(xy) for xy in points])
+            results = self.substract(points=[np.flip(xy) for xy in points])
         if type == "substractionBA":
-            results = self.substract(points)
+            results = self.substract(points=points)
+        if type == "multiplication":
+            results = self.multiplication(points=points)
+        if type == "addition":
+            results = self.addition(points=points)
         
         # Podział listy punktów i wyników na część treningową i testową.
         x_train, x_test = split_list(list=points, percentage=self.train_percentage)
