@@ -1,9 +1,9 @@
-import tensorflow as tf
+# import tensorflow as tf
 import numpy as np
-import generators
+from generators import Generator
 
 
-gen = generators.GeneratorI(80)
-a, b, c, d = gen.Generator(100, 0, 100, "-")
+generator = Generator(train_percentage = "80%")
+a, b, c, d = generator.generate(size = 100, min_range=0, max_range=100, type="substractionAB")
 print(a)
 print(b)

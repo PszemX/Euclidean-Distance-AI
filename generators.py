@@ -1,30 +1,32 @@
 import random
 import numpy as np
 
-def split_list(list_a):
-    half = len(list_a) // 2
-    return list_a[:half], list_a[half:]
+def split_list(list, percentage: float = 0.5):
+    split_point = (len(list) * percentage).__floor__();
+    return list[:split_point], list[split_point:]
 
-class GeneratorI:
-    def __init__(self, train_percent):
-        self.train_percent = train_percent/100
-        self.test_percent = (100 - train_percent)/100
+class Generator:
+    def __init__(self, train_percentage: str, dimensions: int = 2):
+        self.train_percentage: float = float(train_percentage.replace('%', 'e-2'))
+        self.test_percentage: float = float(1 - self.train_percentage)
+        self.dimensions = dimensions
 
-    def Generator(self, size, min_range, max_range, type):
-        xy = np.random.randint(min_range, max_range, size=(size, 2))
-        x_train = xy[:(int)(self.train_percent*size)]
-        x_test = xy[(int)(self.test_percent*size):]
+    def generate(self, size: int, min_range: int, max_range: int, type: str):
+        points = np.random.randint(min_range, max_range, size=(size, self.dimensions))
+        results = []
+        if type == "substractionAB":
+            results = self.substract([np.flip(xy) for xy in points])
+        if type == "substractionBA":
+            results = self.substract(points)
+        
+        x_train, x_test = split_list(list=points, percentage=self.train_percentage)
+        y_train, y_test = split_list(list=results, percentage=self.train_percentage)
 
-        if type == "-":
-            return self.GenSub(x_train, x_test)
-
-    def GenSub(self, x_train, x_test):
-        x_train_tmp = x_train[:, ::-1] # trzeba obrocic, bo inaczej dla [x, y] robi y-x zamiast x-y
-        y_train = np.diff(x_train_tmp, axis=1)
-        x_test_tmp = x_test[:, ::-1]
-        y_test = np.diff(x_test_tmp, axis=1)
- 
         return x_train, y_train, x_test, y_test
+        
+
+    def substract(self, points):
+        return np.diff(points)
 
     def GenMultiply(self, x_train, x_test):
         y_train = np.prod(x_train, axis=1).reshape(-1,1)
