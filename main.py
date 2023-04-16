@@ -1,15 +1,9 @@
-"""
-Stworzyłem to repozytorium z kilku powodów:
+import tensorflow as tf
+import numpy as np
+import generators
 
-1. Po pierwsze, żebyśmy nauczyli się lub pogłębili wiedzę na temat pracy z gitem
-2. Po drugie, żeby kod był cały czas dostępny w chmurze
-3. Po trzecie, żebyśmy mogli zobaczyć kto co zmienił, na co wpadł itp
 
-Stworzę jeszcze później stronę, gdzie będziemy zadania pisali sobie, co jest do zrobienia itp.
-Wypiszę też takie mniej-więcej zasady jak mamy korzystać z pushowania kodu oraz robienia zadań, żeby praca była najefektywniejsza
-oraz żebyśmy również pogłębili wiedzę i praktykę z korzystania w systemie git + scrum.
-"""
-print("Zmiana")
-print("Zmiana 2")
-print("Zmiana3")
-print("Hello World!")
+gen = generators.GeneratorI(80)
+a, b, c, d = gen.Generator(100, 0, 100, "-")
+print(a)
+print(b)
