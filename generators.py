@@ -1,4 +1,3 @@
-import random
 import numpy as np
 
 def split_list(list, percentage: float = 0.5):
@@ -8,7 +7,7 @@ def split_list(list, percentage: float = 0.5):
     :param percentage: Procentowy podział, domyślnie 0.5
     :return: Tuple dwóch list: pierwsza zawiera pierwszą część oryginalnej listy, druga - drugą część.
     """
-    split_point = (len(list) * percentage).__floor__();
+    split_point = (len(list) * percentage).__floor__()
     return list[:split_point], list[split_point:]
 
 class Generator:
