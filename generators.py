@@ -66,7 +66,7 @@ class Generator:
         :param points: Lista punktów do przetworzenia.
         :return: Wynik mnożenia wszystkich punktów.
         """
-        return np.multiply(points)
+        return [np.multiply(xy[0], xy[1]) for xy in points]
 
     def addition(self, points):
         """
@@ -74,7 +74,7 @@ class Generator:
         :param points: Lista punktów do przetworzenia.
         :return: Suma wszystkich punktów.
         """
-        return np.sum(points)
+        return [np.sum(xy) for xy in points]
 
     def GenDiverse(self, points):
         """
