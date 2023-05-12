@@ -8,7 +8,7 @@ a, b, c, d = generator.generate(size = 100, min_range=0, max_range=100, type="su
 print(a)
 print(b)
 
-#Ustawiamy ziarno losowości dla powtarzalności wyników
+#Ustawiamy ziarno losowości dla powtarzalności wyników CHAT GPT DZIALA I DOSYC DOBRE JEST
 np.random.seed(0)
 
 class NeuralNetwork:
