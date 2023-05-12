@@ -3,10 +3,10 @@ import numpy as np
 from generators import Generator
 
 
-#generator = Generator(train_percentage = "80%")
-#a, b, c, d = generator.generate(size = 100, min_range=0, max_range=100, type="substractionAB")
-#print(a)
-#print(b)
+generator = Generator(train_percentage = "80%")
+a, b, c, d = generator.generate(size = 100, min_range=0, max_range=100, type="substractionAB")
+print(a)
+print(b)
 
 #Ustawiamy ziarno losowości dla powtarzalności wyników
 np.random.seed(0)
@@ -56,6 +56,6 @@ X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
 y = np.array([[0], [1], [1], [2]])
 
 nn = NeuralNetwork(input_size=2, hidden_size=3, output_size=1, learning_rate=0.1)
-nn.train(X, y, epochs=10000)
+nn.train(a, b, epochs=10000)
 
 print(nn.predict(X))  # powinno zwrócić [[0], [1], [1], [2]]
