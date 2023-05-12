@@ -19,6 +19,12 @@ class DenseLayer:
     # Sigmoid activation function return count from pattern, return between 0 and 1
     def adctivation_sigmoid(self, X):
         return X/(1 - ((math.e)**X))
+    
+    # Softmax function work with normalization function, for this we can predict output
+    # for each output value normalizes to a fraction of the sum, all of the values are now in the range of 0 to 1 and add up to 1
+    # exp(): y = e**x
+    def activation_softmax(self, X):
+        return np.exp(X)/(np.sum(np.exp(X)))
 
     def forward(self, inputs):
         # Calculate output values from inputs, weights and biases
