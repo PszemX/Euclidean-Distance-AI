@@ -1,8 +1,9 @@
 import numpy as np
 import math
-# z ksiazki
-class NeuralNetwork():
 
+
+# z ksiazki
+class NeuralNetwork:
     def __init__(self, n_input, n_neurons):
         # Initialize weights and biases
         self.weights = 0.01 * np.random.randn(n_input, n_neurons)
@@ -11,15 +12,15 @@ class NeuralNetwork():
     # ReLU activation function for values < 0 return 0, otherwise return value
     def activation_ReLU(self, X):
         return np.maximum(0, X)
-    
+
     # Linear activation function for values return values, it is also named non activation function
     def adctivation_linear(self, X):
         return np.ones_like(X)
-        
+
     # Sigmoid activation function return count from pattern, return between 0 and 1
     def adctivation_sigmoid(self, X):
-        return X/(1 - ((math.e)**X))
-    
+        return X / (1 - ((math.e) ** X))
+
     # Softmax function is normalize exponential function, with this we can predict output
     # for each output value normalizes to a fraction of the sum, all of the values are now in the range of 0 to 1 and add up to 1
     # exp(): y = e**x
@@ -28,7 +29,7 @@ class NeuralNetwork():
     def activation_softmax(self, X):
         exp_values = np.exp(X - np.max(X, axis=1, keepdims=True))
         return exp_values / np.sum(exp_values, axis=1, keepdims=True)
-    
+
     # Coutnig loss of model
     # function take prediction and amount of inputs of the neuron and calculate loss
     # include resolve to errors
@@ -44,20 +45,21 @@ class NeuralNetwork():
             correct_confidences = y_pred_clipped[range(samples), y_true]
         # Mask values - only for one-hot encoded labels
         elif len(y_true.shape) == 2:
-            correct_confidences = np.sum(y_pred_clipped*y_true,axis=1)
+            correct_confidences = np.sum(y_pred_clipped * y_true, axis=1)
         # Losses
-        negative_log_likelihoods = -np.log(correct_confidences)
-        sample_losses = negative_log_likelihoods
+        sample_losses = -np.log(correct_confidences)
         # Calculate mean loss
         data_loss = np.mean(sample_losses)
         # Return loss
         return data_loss
-    
-    # Define accurancy of model 
+
+    # Define accurancy of model
     def accurancy(self, output, y_true):
-        pass
+        return np.mean(output == y_true)
 
     def forward(self, inputs):
         # Calculate output values from inputs, weights and biases
         # Simply output input * weight + bias
-        self.output = self.activation_sigmoid(np.dot(inputs, self.weights) + self.biases)
+        self.output = self.activation_sigmoid(
+            np.dot(inputs, self.weights) + self.biases
+        )

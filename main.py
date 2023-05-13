@@ -1,15 +1,19 @@
 import numpy as np
+from generators import Generator
+from NeuralNetwork import NeuralNetwork
 
 
 # Definiujemy funkcję aktywacji
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
-#Ustawiamy ziarno losowości dla powtarzalności wyników CHAT GPT DZIALA I DOSYC DOBRE JEST
+
+# Ustawiamy ziarno losowości dla powtarzalności wyników CHAT GPT DZIALA I DOSYC DOBRE JEST
 np.random.seed(0)
 
+
 # Definiujemy klasę NeuralNetwork, która będzie reprezentować naszą sieć neuronową
-class NeuralNetwork:
+class NeuralNetwork2:
     def __init__(self, input_size, hidden_size, output_size):
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -52,8 +56,8 @@ class NeuralNetwork:
 
 
 # Tworzymy dane treningowe
-X = np.array([[0, 0],[0, 0],[0, 0],[0, 0], [0, 1], [1, 0], [1, 1],[1, 2]])
-y = np.array([[0],[0],[0],[0], [1], [1], [2],[3]])
+X = np.array([[0, 0], [0, 0], [0, 0], [0, 0], [0, 1], [1, 0], [1, 1], [1, 2]])
+y = np.array([[0], [0], [0], [0], [1], [1], [2], [3]])
 
 # Tworzymy sieć neuronową z jedną warstwą ukrytą o 3 neuronach
 nn = NeuralNetwork(2, 3, 1)
