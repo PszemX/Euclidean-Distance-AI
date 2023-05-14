@@ -4,7 +4,7 @@ COS TUTAJ PROBOWALEM KOMBINOWAC ALE CHUJ
 
 import numpy as np
 from generators import Generator
-from Activation import Activation_ReLU, Activation_Softmax, Activation_Sigmoid
+from Activation2 import Activation_ReLU, Activation_Softmax, Activation_Sigmoid
 import matplotlib.pyplot as plt
 
 np.random.seed(0)
