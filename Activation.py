@@ -4,7 +4,7 @@ import numpy as np
 # ReLU activation
 class Activation_ReLU:
     # Forward pass
-    def forward(self, inputs, training):
+    def forward(self, inputs):
         # Remember input values
         self.inputs = inputs
         # Calculate output values from inputs
@@ -25,7 +25,7 @@ class Activation_ReLU:
 # Softmax activation
 class Activation_Softmax:
     # Forward pass
-    def forward(self, inputs, training):
+    def forward(self, inputs):
         # Remember input values
         self.inputs = inputs
         # Get unnormalized probabilities
@@ -60,7 +60,7 @@ class Activation_Softmax:
 # Sigmoid activation
 class Activation_Sigmoid:
     # Forward pass
-    def forward(self, inputs, training):
+    def forward(self, inputs):
         # Save input and calculate/save output of the sigmoid function
         self.inputs = inputs
         self.output = 1 / (1 + np.exp(-inputs))

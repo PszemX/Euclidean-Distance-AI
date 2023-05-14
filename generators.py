@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def split_list(list, percentage: float = 0.5):
     """
     Funkcja dzieli listę na dwie części na podstawie podanego procentowego podziału i zwraca dwie nowe listy.
@@ -10,6 +11,7 @@ def split_list(list, percentage: float = 0.5):
     split_point = (len(list) * percentage).__floor__()
     return list[:split_point], list[split_point:]
 
+
 class Generator:
     def __init__(self, train_percentage: str, dimensions: int = 2):
         """
@@ -17,7 +19,7 @@ class Generator:
         :param train_percentage: Procentowy podział dla treningu jako string, np. "80%"
         :param dimensions: Liczba wymiarów dla wygenerowanych punktów.
         """
-        self.train_percentage: float = float(train_percentage.replace('%', 'e-2'))
+        self.train_percentage: float = float(train_percentage.replace("%", "e-2"))
         self.test_percentage: float = float(1 - self.train_percentage)
         self.dimensions = dimensions
 
@@ -33,7 +35,7 @@ class Generator:
         # Generowanie losowych punktów.
         points = np.random.randint(min_range, max_range, size=(size, self.dimensions))
         results = []
-        
+
         # Wybór rodzaju operacji i wykonanie jej.
         if type == "substractionAB":
             results = self.substract(points=[np.flip(xy) for xy in points])
@@ -43,13 +45,12 @@ class Generator:
             results = self.multiplication(points=points)
         if type == "addition":
             results = self.addition(points=points)
-        
+
         # Podział listy punktów i wyników na część treningową i testową.
         x_train, x_test = split_list(list=points, percentage=self.train_percentage)
         y_train, y_test = split_list(list=results, percentage=self.train_percentage)
 
         return x_train, y_train, x_test, y_test
-        
 
     def substract(self, points):
         """
@@ -57,7 +58,7 @@ class Generator:
         :param points: Lista punktów do przetworzenia.
         :return: Lista różnic między punktami, obliczonymi dla każdej pary.
         """
-        return np.diff(points)
+        return np.array(np.diff(points))
 
     def multiplication(self, points):
         """
@@ -65,7 +66,7 @@ class Generator:
         :param points: Lista punktów do przetworzenia.
         :return: Wynik mnożenia wszystkich punktów.
         """
-        return [np.multiply(xy[0], xy[1]) for xy in points]
+        return np.array([np.multiply(xy[0], xy[1]) for xy in points])
 
     def addition(self, points):
         """
@@ -73,7 +74,7 @@ class Generator:
         :param points: Lista punktów do przetworzenia.
         :return: Suma wszystkich punktów.
         """
-        return [np.sum(xy) for xy in points]
+        return np.array([np.sum(xy) for xy in points])
 
     def GenDiverse(self, points):
         """
