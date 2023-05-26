@@ -11,7 +11,7 @@ input_size = 2
 hidden_sizes = [512, 256, 128]  # List of hidden layer sizes
 output_size = 1
 learning_rate = 0.0001
-epochs = 300
+epochs = 3000
 batch_size = 32
 
 
@@ -24,12 +24,16 @@ class NeuralNetwork:
         # from 1 to n-1 layer
         prev_size = input_size
         for size in hidden_sizes:
-            self.weights.append(np.random.randn(prev_size, size) * np.sqrt(2 / prev_size))
+            self.weights.append(
+                np.random.randn(prev_size, size) * np.sqrt(2 / prev_size)
+            )
             self.biases.append(np.zeros(size))
             prev_size = size
 
         # Output layer
-        self.weights.append(np.random.randn(prev_size, output_size) * np.sqrt(2 / prev_size))
+        self.weights.append(
+            np.random.randn(prev_size, output_size) * np.sqrt(2 / prev_size)
+        )
         self.biases.append(np.zeros(output_size))
 
     def forward(self, X):
@@ -37,8 +41,10 @@ class NeuralNetwork:
         prev_layer_output = X
 
         for i in range(len(self.hidden_sizes)):
-            hidden_layer = np.maximum(0.01 * np.dot(prev_layer_output, self.weights[i]) + self.biases[i],
-                                      np.dot(prev_layer_output, self.weights[i]) + self.biases[i])
+            hidden_layer = np.maximum(
+                0.01 * np.dot(prev_layer_output, self.weights[i]) + self.biases[i],
+                np.dot(prev_layer_output, self.weights[i]) + self.biases[i],
+            )
             self.hidden_layers.append(hidden_layer)
             prev_layer_output = hidden_layer
 
@@ -78,22 +84,22 @@ losses = []
 
 for epoch in range(epochs):
     epoch_loss = 0.0
-    
+
     # Shuffle training data
     indices = np.random.permutation(num_samples)
     x_shuffled = x[indices]
     y_shuffled = y[indices]
-    
+
     for idx in range(0, num_samples, batch_size):
         batch_x = x_shuffled[idx : idx + batch_size]
         batch_y = y_shuffled[idx : idx + batch_size]
-        
+
         # Forward pass
         output = model.forward(batch_x)
 
         # Backward pass
         model.backward(batch_x, batch_y.reshape(-1, 1), learning_rate)
-        
+
         # Compute batch loss
         batch_loss = np.mean((output - batch_y.reshape(-1, 1)) ** 2)
         epoch_loss += batch_loss
