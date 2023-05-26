@@ -1,3 +1,7 @@
+"""
+Ten kod zawiera aktualnie najlepszą wersję dla 1 warstwy.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -13,6 +17,7 @@ output_size = 1
 learning_rate = 0.001
 epochs = 3000
 
+
 class NeuralNetwork:
     def __init__(self, input_size, hidden_size, output_size):
         self.W1 = np.random.randn(input_size, hidden_size) * np.sqrt(2 / input_size)
@@ -21,7 +26,9 @@ class NeuralNetwork:
         self.b2 = np.zeros(output_size)
 
     def forward(self, X):
-        self.hidden = np.maximum(0.01 * np.dot(X, self.W1) + self.b1, np.dot(X, self.W1) + self.b1)
+        self.hidden = np.maximum(
+            0.01 * np.dot(X, self.W1) + self.b1, np.dot(X, self.W1) + self.b1
+        )
         self.output = np.dot(self.hidden, self.W2) + self.b2
         return self.output
 
@@ -43,6 +50,7 @@ class NeuralNetwork:
         self.b2 -= learning_rate * db2
         self.W1 -= learning_rate * dW1
         self.b1 -= learning_rate * db1
+
 
 # Training loop
 model = NeuralNetwork(input_size, hidden_size, output_size)
