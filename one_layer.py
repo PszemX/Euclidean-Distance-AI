@@ -77,7 +77,7 @@ for epoch in range(epochs):
     loss = np.mean((output - y.reshape(-1, 1)) ** 2)
     losses.append(loss)
     if epoch % 100 == 0:
-        print(f"Epoch: {epoch}, Loss: {loss:.4f}")
+        print(f"Epoch: {epoch}, Loss: {loss:.8f}")
 
     # Adjust learning rate (learning rate decay)
     if (epoch + 1) % 200 == 0:
