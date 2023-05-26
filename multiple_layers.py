@@ -1,8 +1,3 @@
-"""
-Ten kod zawiera aktualnie najlepszą wersję dla wielu warstw.
-"""
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -13,74 +8,90 @@ y = np.sum(x, axis=1)
 
 # Initialize neural network
 input_size = 2
-hidden_sizes = [512, 256, 128]  # List of hidden layer sizes
+hidden_sizes = [512, 256, 128]
 output_size = 1
 learning_rate = 0.0001
 epochs = 3000
 batch_size = 32
+clip_threshold = 1.0  # Adjust the threshold as needed
+
+
+class ActivationReLU:
+    def forward(self, input):
+        self.input = input
+        self.output = np.maximum(input, 0)
+        return self.output
+
+    def backward(self, dvalues):
+        self.dinputs = dvalues.copy()
+        self.dinputs[self.input <= 0] = 0
+        return self.dinputs
+
+
+class Layer:
+    def __init__(self, input_size, output_size, activation):
+        self.weights = np.random.randn(input_size, output_size) * np.sqrt(
+            2 / input_size
+        )
+        self.biases = np.zeros(output_size)
+        self.activation = activation
+        self.dweights = None
+        self.dbiases = None
+
+    def forward(self, x):
+        self.input = x
+        self.output = np.dot(self.input, self.weights) + self.biases
+        return self.activation.forward(self.output)
+
+    def backward(self, dvalues):
+        dinputs = self.activation.backward(dvalues)
+        self.dweights = np.dot(self.input.T, dinputs)
+        self.dbiases = np.sum(dinputs, axis=0)
+        return np.dot(dinputs, self.weights.T)
 
 
 class NeuralNetwork:
     def __init__(self, input_size, hidden_sizes, output_size):
         self.hidden_sizes = hidden_sizes
-        self.weights = []
-        self.biases = []
+        self.layers = []
 
-        # from 1 to n-1 layer
-        prev_size = input_size
-        for size in hidden_sizes:
-            self.weights.append(
-                np.random.randn(prev_size, size) * np.sqrt(2 / prev_size)
+        # Input layer to first hidden layer
+        self.layers.append(Layer(input_size, hidden_sizes[0], ActivationReLU()))
+
+        # Hidden layers with batch normalization
+        for i in range(1, len(hidden_sizes)):
+            self.layers.append(
+                Layer(hidden_sizes[i - 1], hidden_sizes[i], ActivationReLU())
             )
-            self.biases.append(np.zeros(size))
-            prev_size = size
 
-        # Output layer
-        self.weights.append(
-            np.random.randn(prev_size, output_size) * np.sqrt(2 / prev_size)
-        )
-        self.biases.append(np.zeros(output_size))
+        # Last hidden layer to output layer
+        self.layers.append(Layer(hidden_sizes[-1], output_size, ActivationReLU()))
 
-    def forward(self, X):
-        self.hidden_layers = []
-        prev_layer_output = X
+    def forward(self, x):
+        for layer in self.layers:
+            x = layer.forward(x)
+        return x
 
-        for i in range(len(self.hidden_sizes)):
-            hidden_layer = np.maximum(
-                0.01 * np.dot(prev_layer_output, self.weights[i]) + self.biases[i],
-                np.dot(prev_layer_output, self.weights[i]) + self.biases[i],
-            )
-            self.hidden_layers.append(hidden_layer)
-            prev_layer_output = hidden_layer
-
-        self.output = np.dot(prev_layer_output, self.weights[-1]) + self.biases[-1]
-        return self.output
-
-    def backward(self, X, y, learning_rate):
-        d_output = 2 * (self.output - y) / len(X)
-        dW = []
-        db = []
-
-        d_hidden = d_output
-
-        for i in range(len(self.hidden_sizes) - 1, -1, -1):
-            dW.append(np.dot(self.hidden_layers[i].T, d_hidden))
-            db.append(np.sum(d_hidden, axis=0))
-            d_hidden = np.dot(d_hidden, self.weights[i + 1].T)
-            d_hidden[self.hidden_layers[i] <= 0] = 0
-
-        dW.append(np.dot(X.T, d_hidden))
-        db.append(np.sum(d_hidden, axis=0))
-
-        # Gradient clipping
-        max_grad = 1.0
-        dW = [np.clip(dw, -max_grad, max_grad) for dw in dW]
-        db = [np.clip(db, -max_grad, max_grad) for db in db]
-
-        # Update weights and biases
-        for i in range(len(self.weights)):
-            self.weights[i] -= learning_rate * dW[len(dW) - 1 - i]
-            self.biases[i] -= learning_rate * db[len(db) - 1 - i]
+    def backward(self, x, y, learning_rate, clip_threshold=None):
+        dvalues = 2 * (self.layers[-1].output - y) / y.size
+        for layer in reversed(self.layers):
+            dvalues = layer.backward(dvalues)
+            if isinstance(layer, Layer):
+                if clip_threshold is not None:
+                    np.clip(
+                        layer.dweights,
+                        -clip_threshold,
+                        clip_threshold,
+                        out=layer.dweights,
+                    )
+                    np.clip(
+                        layer.dbiases,
+                        -clip_threshold,
+                        clip_threshold,
+                        out=layer.dbiases,
+                    )
+                layer.weights -= learning_rate * layer.dweights
+                layer.biases -= learning_rate * layer.dbiases
 
 
 # Training loop
@@ -102,8 +113,13 @@ for epoch in range(epochs):
         # Forward pass
         output = model.forward(batch_x)
 
-        # Backward pass
-        model.backward(batch_x, batch_y.reshape(-1, 1), learning_rate)
+        # Backward pass with gradient clipping
+        model.backward(
+            batch_x,
+            batch_y.reshape(-1, 1),
+            learning_rate,
+            clip_threshold=clip_threshold,
+        )
 
         # Compute batch loss
         batch_loss = np.mean((output - batch_y.reshape(-1, 1)) ** 2)
@@ -113,7 +129,7 @@ for epoch in range(epochs):
     loss = epoch_loss / (num_samples // batch_size)
     losses.append(loss)
     if epoch % 100 == 0:
-        print(f"Epoch: {epoch}, Loss: {loss:.4f}")
+        print(f"Epoch: {epoch}, Loss: {loss:.8f}")
 
     # Adjust learning rate (learning rate decay)
     if (epoch + 1) % 200 == 0:
