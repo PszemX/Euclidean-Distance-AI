@@ -36,15 +36,20 @@ class Layer:
         self.output = self.activation.forward(np.dot(self.input, self.weights) + self.biases) 
         return self.output
     
-    def backward(self, x, y, learning_rate):
-        d_output = self.activation.backward(y)
+    def backward(self, dvalues):
+        # Gradients on parameters
+        self.dweights = np.dot(self.input.T, dvalues)
+        self.dbiases = np.sum(dvalues, axis=0, keepdims=True)
+        # Gradient on values
+        self.dinputs = np.dot(dvalues, self.weights.T)
+        return 0, 0
 
 class NeuralNetwork:
     def __init__(self, input_size, hidden_sizes, output_size):
         self.hidden_sizes = hidden_sizes
         self.weights = []
         self.biases = []
-        #
+        # CLASS
         self.layers = []
 
         # from 1 to n-1 layer
@@ -60,12 +65,13 @@ class NeuralNetwork:
         # Output layer
         self.weights.append(np.random.randn(prev_size, output_size) * np.sqrt(2 / prev_size))
         self.biases.append(np.zeros(output_size))
-        #
+        # CLASS
         self.layers.append(Layer(prev_size, output_size, Activation_Relu()))
 
     def forward(self, x):
         self.hidden_layers = []
         prev_layer_output = x
+        # CLASS
         prev_layer_output2 = x
 
         for i in range(len(self.layers)):
@@ -74,7 +80,7 @@ class NeuralNetwork:
             self.hidden_layers.append(hidden_layer)
             prev_layer_output = hidden_layer
         
-        #
+        # CLASS
         for i in range(len(self.layers)):
             prev_layer_output2 = self.layers[i].forward(prev_layer_output2)
 
@@ -85,10 +91,14 @@ class NeuralNetwork:
         d_output = 2 * (self.output - y) / len(X)
         dW = []
         db = []
+        dW2 = []
+        db2 = []
 
         d_hidden = d_output
-
+        d_hidden2 = d_output
+        # zaczynamy od konca
         for i in range(len(self.hidden_sizes) - 1, -1, -1):
+            # mnozymy output * pochodna outputu
             dW.append(np.dot(self.hidden_layers[i].T, d_hidden))
             db.append(np.sum(d_hidden, axis=0))
             d_hidden = np.dot(d_hidden, self.weights[i + 1].T)
@@ -97,7 +107,13 @@ class NeuralNetwork:
         dW.append(np.dot(X.T, d_hidden))
         db.append(np.sum(d_hidden, axis=0))
 
-        # Gradient clipping
+        # CLASS
+        for i in range(len(self.hidden_sizes), -1, -1):
+            dW1, dW2 = self.layers[i].backward(d_hidden2)
+            dW2.append(dW1)
+            db2.append(dW2)
+            # Gradient clipping
+            
         max_grad = 1.0
         dW = [np.clip(dw, -max_grad, max_grad) for dw in dW]
         db = [np.clip(db, -max_grad, max_grad) for db in db]
