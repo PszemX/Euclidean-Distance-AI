@@ -28,6 +28,50 @@ class ActivationReLU:
         return self.dinputs
 
 
+class ActivationSoftmax:
+    def forward(self, input):
+        self.input = input
+        exp_values = np.exp(input - np.max(input, axis=1, keepdims=True))
+        probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
+        self.output = probabilities
+        return self.output
+
+    def backward(self, dvalues):
+        self.dinputs = np.empty_like(dvalues)
+        for index, (single_output, single_dvalues) in enumerate(
+            zip(self.output, dvalues)
+        ):
+            single_output = single_output.reshape(-1, 1)
+            jacobian_matrix = np.diagflat(single_output) - np.dot(
+                single_output, single_output.T
+            )
+            self.dinputs[index] = np.dot(jacobian_matrix, single_dvalues)
+        return self.dinputs
+
+
+class ActivationSigmoid:
+    def forward(self, input):
+        self.input = input
+        self.output = 1 / (1 + np.exp(-input))
+        return self.output
+
+    def backward(self, dvalues):
+        sigmoid = 1 / (1 + np.exp(-self.input))
+        self.dinputs = dvalues * sigmoid * (1 - sigmoid)
+        return self.dinputs
+
+
+class ActivationTanh:
+    def forward(self, input):
+        self.input = input
+        self.output = np.tanh(input)
+        return self.output
+
+    def backward(self, dvalues):
+        self.dinputs = dvalues * (1 - np.tanh(self.input) ** 2)
+        return self.dinputs
+
+
 class Layer:
     def __init__(self, input_size, output_size, activation):
         self.weights = np.random.randn(input_size, output_size) * np.sqrt(
@@ -56,16 +100,16 @@ class NeuralNetwork:
         self.layers = []
 
         # Input layer to first hidden layer
-        self.layers.append(Layer(input_size, hidden_sizes[0], ActivationReLU()))
+        self.layers.append(Layer(input_size, hidden_sizes[0], ActivationTanh()))
 
         # Hidden layers with batch normalization
         for i in range(1, len(hidden_sizes)):
             self.layers.append(
-                Layer(hidden_sizes[i - 1], hidden_sizes[i], ActivationReLU())
+                Layer(hidden_sizes[i - 1], hidden_sizes[i], ActivationTanh())
             )
 
         # Last hidden layer to output layer
-        self.layers.append(Layer(hidden_sizes[-1], output_size, ActivationReLU()))
+        self.layers.append(Layer(hidden_sizes[-1], output_size, ActivationTanh()))
 
     def forward(self, x):
         for layer in self.layers:
