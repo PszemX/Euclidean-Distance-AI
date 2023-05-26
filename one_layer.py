@@ -1,3 +1,8 @@
+"""
+Ten kod zawiera aktualnie najlepszą wersję dla 1 warstwy.
+"""
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 
