@@ -28,6 +28,20 @@ class ActivationReLU:
         return self.dinputs
 
 
+class ActivationLeakyReLU:
+    def __init__(self, alpha=0.01):
+        self.alpha = alpha
+
+    def forward(self, input):
+        self.input = input
+        self.output = np.where(input > 0, input, self.alpha * input)
+        return self.output
+
+    def backward(self, dvalues):
+        self.dinputs = np.where(self.input > 0, dvalues, self.alpha * dvalues)
+        return self.dinputs
+
+
 class ActivationSoftmax:
     def forward(self, input):
         self.input = input
