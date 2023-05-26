@@ -13,7 +13,7 @@ output_size = 1
 learning_rate = 0.0001
 epochs = 3000
 batch_size = 32
-clip_threshold = 1.0  # Adjust the threshold as needed
+clip_threshold = 5.0  # Adjust the threshold as needed
 
 
 class ActivationReLU:
