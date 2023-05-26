@@ -114,16 +114,16 @@ class NeuralNetwork:
         self.layers = []
 
         # Input layer to first hidden layer
-        self.layers.append(Layer(input_size, hidden_sizes[0], ActivationTanh()))
+        self.layers.append(Layer(input_size, hidden_sizes[0], ActivationReLU()))
 
         # Hidden layers with batch normalization
         for i in range(1, len(hidden_sizes)):
             self.layers.append(
-                Layer(hidden_sizes[i - 1], hidden_sizes[i], ActivationTanh())
+                Layer(hidden_sizes[i - 1], hidden_sizes[i], ActivationReLU())
             )
 
         # Last hidden layer to output layer
-        self.layers.append(Layer(hidden_sizes[-1], output_size, ActivationTanh()))
+        self.layers.append(Layer(hidden_sizes[-1], output_size, ActivationReLU()))
 
     def forward(self, x):
         for layer in self.layers:
