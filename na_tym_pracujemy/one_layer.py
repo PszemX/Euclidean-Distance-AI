@@ -9,52 +9,12 @@ y = np.sum(x, axis=1)
 # Initialize neural network
 input_size = 2
 hidden_size = 512
-hidden_layers = 2
 output_size = 1
 learning_rate = 0.001
-epochs = 100
-
-class Activation_Relu:
-    def forward(self, input):
-        self.input = input
-        self.output = np.maximum(0.01 * input, input)
-        return self.output
-
-    def backward(self, dvalues):
-        self.dinputs = dvalues.copy()
-        self.dinputs[self.input <= 0] = 0
-
-class HiddenLayer:
-    def __init__(self, input_size, output_size, neurons, activation):
-        self.weight = np.random.randn(input_size, neurons) * np.sqrt(2 / input_size)
-        self.bias = np.zeros(neurons)
-        self.activation = activation
-        self.output_size = np.ones((neurons, output_size))
-    
-    def forward(self, X):
-        self.hidden = self.activation.forward((np.dot(X, self.weight) + self.bias))
-        self.output = np.dot(self.hidden, self.output_size)
-        return self.output
-
-    def backward(self, X, y, learning_rate):
-        d_output = self.output - y
-        d_hidden = np.dot(d_output, self.output_size.T)
-        d_hidden[self.hidden <= 0] = 0
-        dW1 = np.dot(X.T, d_hidden)
-        db1 = np.sum(d_hidden, axis=0)
-
-        # Gradient clipping
-        max_grad = 5.0
-        dW1 = np.clip(dW1, -max_grad, max_grad)
-
-        self.weight -= learning_rate * dW1
-        self.bias -= learning_rate * db1
-
-    def loss(self, x, y, learning_rate):
-        return np.mean((output - y.reshape(-1, 1)) ** 2)
+epochs = 3000
 
 class NeuralNetwork:
-    def __init__(self, input_size, hidden_size, hidden_layers ,output_size):
+    def __init__(self, input_size, hidden_size, output_size):
         self.W1 = np.random.randn(input_size, hidden_size) * np.sqrt(2 / input_size)
         self.b1 = np.zeros(hidden_size)
         self.W2 = np.random.randn(hidden_size, output_size) * np.sqrt(2 / hidden_size)
@@ -64,7 +24,7 @@ class NeuralNetwork:
         self.hidden = np.maximum(0.01 * np.dot(X, self.W1) + self.b1, np.dot(X, self.W1) + self.b1)
         self.output = np.dot(self.hidden, self.W2) + self.b2
         return self.output
-    
+
     def backward(self, X, y, learning_rate):
         d_output = self.output - y
         dW2 = np.dot(self.hidden.T, d_output)
@@ -85,13 +45,8 @@ class NeuralNetwork:
         self.b1 -= learning_rate * db1
 
 # Training loop
-model = NeuralNetwork(input_size, hidden_size, hidden_layers ,output_size)
+model = NeuralNetwork(input_size, hidden_size, output_size)
 losses = []
-
-a_model = HiddenLayer(input_size, 64, 128, Activation_Relu())
-a_model.forward(x)
-
-exit()
 
 for epoch in range(epochs):
     # Forward pass
