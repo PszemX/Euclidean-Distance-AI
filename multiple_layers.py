@@ -95,21 +95,11 @@ class Layer:
 
 
 class NeuralNetwork:
-    def __init__(self, input_size, hidden_sizes, output_size):
-        self.hidden_sizes = hidden_sizes
+    def __init__(self):
         self.layers = []
 
-        # Input layer to first hidden layer
-        self.layers.append(Layer(input_size, hidden_sizes[0], ActivationReLU()))
-
-        # Hidden layers with batch normalization
-        for i in range(1, len(hidden_sizes)):
-            self.layers.append(
-                Layer(hidden_sizes[i - 1], hidden_sizes[i], ActivationReLU())
-            )
-
-        # Last hidden layer to output layer
-        self.layers.append(Layer(hidden_sizes[-1], output_size, ActivationReLU()))
+    def add(self, layer):
+        self.layers.append(layer)
 
     def configureTraining(self, epochs=1000, learning_rate=0.0001, batch_size=32, clip_threshold=5.0):
         self.epochs = epochs
@@ -144,6 +134,7 @@ class NeuralNetwork:
                 layer.biases -= self.learning_rate * layer.dbiases
 
     def train(self, x, y, num_samples):
+        losses = []
         for self.epoch in range(self.epochs):
             epoch_loss = 0.0
 
@@ -215,12 +206,16 @@ test_data = np.random.randint(55, 100, size=(100, 2))
 
 # Initialize neural network
 input_size = 2
-hidden_sizes = [512, 256, 128]
+hidden_sizes = [512, 256, 128, 256, 512]
 output_size = 1
 
 # Training loop
-model = NeuralNetwork(input_size, hidden_sizes, output_size)
-losses = []
+model = NeuralNetwork()
+
+model.add(Layer(2, 512, ActivationReLU()))
+model.add(Layer(512, 256, ActivationReLU()))
+model.add(Layer(256, 128, ActivationReLU()))
+model.add(Layer(128, 1, ActivationReLU()))
 
 model.configureTraining(epochs=300, batch_size=32, clip_threshold=5.0, learning_rate=0.0001)
 model.train(x, y, num_samples)
