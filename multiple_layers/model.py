@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from activations import *
+from optimizers import *
 
 
 class Layer:
@@ -10,6 +11,8 @@ class Layer:
         )
         self.biases = np.zeros(output_size)
         self.activation = activation
+
+        ################################################################
         self.dweights = None
         self.dbiases = None
         self.vw = np.zeros_like(self.weights)
@@ -43,23 +46,22 @@ class NeuralNetwork:
         learning_rate=0.0001,
         batch_size=None,
         clip_threshold=None,
-        beta1=0.9,
-        beta2=0.999,
-        epsilon=1e-8,
+        optimizer=None,
+        accuracy=0.1,
     ):
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.clip_threshold = clip_threshold
-        self.beta1 = beta1
-        self.beta2 = beta2
-        self.epsilon = epsilon
+        self.optimizer = optimizer
+        self.accuracy = accuracy
 
-    def countAccuracy(self, predicted, y_real, acc):
+
+    def countAccuracy(self, predicted, y_real):
         return (
             np.mean(
                 np.where(
-                    ((predicted + acc) >= y_real) & ((predicted - acc) <= y_real), 1, 0
+                    ((predicted + self.accuracy) >= y_real) & ((predicted - self.accuracy) <= y_real), 1, 0
                 )
             )
             * 100
@@ -88,29 +90,8 @@ class NeuralNetwork:
                     out=layer.dbiases,
                 )
 
-            # Adam optimizer
-            layer.vw = self.beta1 * layer.vw + (1 - self.beta1) * layer.dweights
-            layer.vb = self.beta1 * layer.vb + (1 - self.beta1) * layer.dbiases
-
-            layer.sw = self.beta2 * layer.sw + (1 - self.beta2) * (layer.dweights**2)
-            layer.sb = self.beta2 * layer.sb + (1 - self.beta2) * (layer.dbiases**2)
-
-            vw_corrected = layer.vw / (1 - self.beta1)
-            vb_corrected = layer.vb / (1 - self.beta1)
-
-            sw_corrected = layer.sw / (1 - self.beta2)
-            sb_corrected = layer.sb / (1 - self.beta2)
-
-            layer.weights -= (
-                self.learning_rate
-                * vw_corrected
-                / (np.sqrt(sw_corrected) + self.epsilon)
-            )
-            layer.biases -= (
-                self.learning_rate
-                * vb_corrected
-                / (np.sqrt(sb_corrected) + self.epsilon)
-            )
+            # Update parameters by optimizer
+            self.optimizer.update_layer(layer)
 
     def train(self, x, y):
         losses = []
@@ -166,7 +147,7 @@ class NeuralNetwork:
         predicted = self.forward(x).flatten()
 
         # Calculate accuracy
-        accuracy = self.countAccuracy(predicted=predicted, y_real=y, acc=0.1)
+        accuracy = self.countAccuracy(predicted=predicted, y_real=y)
 
         # Visualize the results
         plt.scatter(x[:, 0], x[:, 1], c=predicted)
