@@ -192,39 +192,38 @@ class NeuralNetwork:
         plt.title("Training Loss")
         plt.show()
 
+    def test(self, x):
+        predicted_sums = model.forward(x).flatten()
+
+        # Visualize the results
+        plt.scatter(x[:, 0], x[:, 1], c=predicted_sums)
+        plt.colorbar(label="Predicted Sum")
+        plt.xlabel("X")
+        plt.ylabel("Y")
+        plt.title("Sum of Two Numbers")
+        plt.show()
+
+        for i, data in enumerate(x):
+            print(f"{data} -> {predicted_sums[i]}")
 
 # Generate training data
 num_samples = 1000
 x = np.random.randint(0, 20, size=(num_samples, 2))
 y = np.sum(x, axis=1)
+# Generate test data
+test_data = np.random.randint(55, 100, size=(100, 2))
 
 # Initialize neural network
 input_size = 2
 hidden_sizes = [512, 256, 128]
 output_size = 1
-learning_rate = 0.0001
-epochs = 300
-batch_size = 32
-clip_threshold = 5.0  # Adjust the threshold as needed
 
 # Training loop
 model = NeuralNetwork(input_size, hidden_sizes, output_size)
 losses = []
 
-model.configureTraining(epochs=epochs, batch_size=batch_size, clip_threshold=clip_threshold, learning_rate=learning_rate)
+model.configureTraining(epochs=300, batch_size=32, clip_threshold=5.0, learning_rate=0.0001)
 model.train(x, y, num_samples)
 
-# Generate test data
-test_data = np.random.randint(0, 20, size=(100, 2))
-predicted_sums = model.forward(test_data).flatten()
 
-# Visualize the results
-plt.scatter(test_data[:, 0], test_data[:, 1], c=predicted_sums)
-plt.colorbar(label="Predicted Sum")
-plt.xlabel("X")
-plt.ylabel("Y")
-plt.title("Sum of Two Numbers")
-plt.show()
-
-for i, data in enumerate(test_data):
-    print(f"{data} -> {predicted_sums[i]}")
+model.test(test_data)
