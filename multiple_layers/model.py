@@ -27,6 +27,7 @@ class Layer:
 class NeuralNetwork:
     def __init__(self):
         self.layers = []
+        self.loss = 0
 
     def add(self, layer):
         self.layers.append(layer)
@@ -63,17 +64,17 @@ class NeuralNetwork:
                 layer.weights -= self.learning_rate * layer.dweights
                 layer.biases -= self.learning_rate * layer.dbiases
 
-    def train(self, x, y, num_samples):
+    def train(self, x, y):
         losses = []
         for self.epoch in range(self.epochs):
             epoch_loss = 0.0
 
             # Shuffle training data
-            indices = np.random.permutation(num_samples)
+            indices = np.random.permutation(len(x))
             x_shuffled = x[indices]
             y_shuffled = y[indices]
 
-            for idx in range(0, num_samples, self.batch_size):
+            for idx in range(0, len(x), self.batch_size):
                 batch_x = x_shuffled[idx : idx + self.batch_size]
                 batch_y = y_shuffled[idx : idx + self.batch_size]
 
@@ -92,7 +93,7 @@ class NeuralNetwork:
                 epoch_loss += batch_loss
 
             # Print progress
-            loss = epoch_loss / (num_samples // self.batch_size)
+            loss = epoch_loss / (len(x) // self.batch_size)
             losses.append(loss)
             if self.epoch % 100 == 0:
                 print(f"Epoch: {self.epoch}, Loss: {loss:.8f}")
@@ -105,7 +106,7 @@ class NeuralNetwork:
             if np.isnan(loss):
                 print("Loss became NaN. Terminating training.")
                 break
-
+        self.loss = loss
         # Plot the loss curve
         plt.plot(losses)
         plt.xlabel("Epoch")
@@ -113,11 +114,13 @@ class NeuralNetwork:
         plt.title("Training Loss")
         plt.show()
 
-    def test(self, x):
-        predicted_sums = self.forward(x).flatten()
+    def test(self, x, y):
+        predicted = self.forward(x).flatten()
+
+        test_loss = np.mean(np.where(predicted <= y, predicted/y, y/predicted)) * 100
 
         # Visualize the results
-        plt.scatter(x[:, 0], x[:, 1], c=predicted_sums)
+        plt.scatter(x[:, 0], x[:, 1], c=predicted)
         plt.colorbar(label="Predicted Sum")
         plt.xlabel("X")
         plt.ylabel("Y")
@@ -125,4 +128,8 @@ class NeuralNetwork:
         plt.show()
 
         for i, data in enumerate(x):
-            print(f"{data} -> {predicted_sums[i]}")
+            print(f"{data} -> {predicted[i]}")
+
+        print("\n Test predicted percent:")
+        print(f"{test_loss:.4f} %")
+        
