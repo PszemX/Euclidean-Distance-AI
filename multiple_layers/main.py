@@ -13,10 +13,12 @@ model = NeuralNetwork()
 
 # Add layers
 model.add(Layer(input_size=2, output_size=512, activation=ActivationReLU()))
-model.add(Layer(input_size=512, output_size=1, activation=ActivationReLU()))
+model.add(Layer(input_size=512, output_size=256, activation=ActivationReLU()))
+model.add(Layer(input_size=256, output_size=128, activation=ActivationReLU()))
+model.add(Layer(input_size=128, output_size=1, activation=ActivationReLU()))
 
 # Configure and finilize model
-model.configureTraining(epochs=1000, batch_size=32, clip_threshold=2.0, learning_rate=0.0001)
+model.configureTraining(epochs=600, batch_size=128, clip_threshold=5.0, learning_rate=0.0001)
 
 # Train model
 model.train(x=x_train, y=y_train)

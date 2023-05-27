@@ -32,40 +32,46 @@ class NeuralNetwork:
     def add(self, layer):
         self.layers.append(layer)
 
-    def configureTraining(self, epochs=1000, learning_rate=0.0001, batch_size=32, clip_threshold=5.0):
+    def configureTraining(self, epochs=1000, learning_rate=0.0001, batch_size=None, clip_threshold=None):
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.clip_threshold = clip_threshold
+
+    def countAccuracy(self, predicted, y_real, acc):
+        return np.mean(np.where(((predicted + acc) >= y_real) & ((predicted - acc) <= y_real), 1, 0)) * 100
 
     def forward(self, x):
         for layer in self.layers:
             x = layer.forward(x)
         return x
 
-    def backward(self, x, y, clip_threshold=None):
+    def backward(self, x, y):
         dvalues = 2 * (self.layers[-1].output - y) / y.size
         for layer in reversed(self.layers):
             dvalues = layer.backward(dvalues)
-            if isinstance(layer, Layer):
-                if clip_threshold is not None:
-                    np.clip(
-                        layer.dweights,
-                        -clip_threshold,
-                        clip_threshold,
-                        out=layer.dweights,
-                    )
-                    np.clip(
-                        layer.dbiases,
-                        -clip_threshold,
-                        clip_threshold,
-                        out=layer.dbiases,
-                    )
-                layer.weights -= self.learning_rate * layer.dweights
-                layer.biases -= self.learning_rate * layer.dbiases
+            if self.clip_threshold is not None:
+                np.clip(
+                    layer.dweights,
+                    -self.clip_threshold,
+                    self.clip_threshold,
+                    out=layer.dweights,
+                )
+                np.clip(
+                    layer.dbiases,
+                    -self.clip_threshold,
+                    self.clip_threshold,
+                    out=layer.dbiases,
+                )
+            layer.weights -= self.learning_rate * layer.dweights
+            layer.biases -= self.learning_rate * layer.dbiases
 
     def train(self, x, y):
         losses = []
+
+        if self.batch_size is None:
+            self.batch_size = len(x)
+
         for self.epoch in range(self.epochs):
             epoch_loss = 0.0
 
@@ -85,7 +91,6 @@ class NeuralNetwork:
                 self.backward(
                     batch_x,
                     batch_y.reshape(-1, 1),
-                    clip_threshold=self.clip_threshold,
                 )
 
                 # Compute batch loss
@@ -117,7 +122,8 @@ class NeuralNetwork:
     def test(self, x, y):
         predicted = self.forward(x).flatten()
 
-        test_loss = np.mean(np.where(predicted <= y, predicted/y, y/predicted)) * 100
+        # Calculate accuracy
+        accuracy = self.countAccuracy(predicted=predicted, y_real=y, acc=0.1)
 
         # Visualize the results
         plt.scatter(x[:, 0], x[:, 1], c=predicted)
@@ -130,6 +136,6 @@ class NeuralNetwork:
         for i, data in enumerate(x):
             print(f"{data} -> {predicted[i]}")
 
-        print("\n Test predicted percent:")
-        print(f"{test_loss:.4f} %")
+        print("\nAccuracy:")
+        print(f"{accuracy:.2f} %")
         
