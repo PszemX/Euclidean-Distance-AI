@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from activations import *
 
+
 class Layer:
     def __init__(self, input_size, output_size, activation):
         self.weights = np.random.randn(input_size, output_size) * np.sqrt(
@@ -11,6 +12,10 @@ class Layer:
         self.activation = activation
         self.dweights = None
         self.dbiases = None
+        self.vw = np.zeros_like(self.weights)
+        self.vb = np.zeros_like(self.biases)
+        self.sw = np.zeros_like(self.weights)
+        self.sb = np.zeros_like(self.biases)
 
     def forward(self, x):
         self.input = x
@@ -32,14 +37,33 @@ class NeuralNetwork:
     def add(self, layer):
         self.layers.append(layer)
 
-    def configureTraining(self, epochs=1000, learning_rate=0.0001, batch_size=None, clip_threshold=None):
+    def configureTraining(
+        self,
+        epochs=1000,
+        learning_rate=0.0001,
+        batch_size=None,
+        clip_threshold=None,
+        beta1=0.9,
+        beta2=0.999,
+        epsilon=1e-8,
+    ):
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.clip_threshold = clip_threshold
+        self.beta1 = beta1
+        self.beta2 = beta2
+        self.epsilon = epsilon
 
     def countAccuracy(self, predicted, y_real, acc):
-        return np.mean(np.where(((predicted + acc) >= y_real) & ((predicted - acc) <= y_real), 1, 0)) * 100
+        return (
+            np.mean(
+                np.where(
+                    ((predicted + acc) >= y_real) & ((predicted - acc) <= y_real), 1, 0
+                )
+            )
+            * 100
+        )
 
     def forward(self, x):
         for layer in self.layers:
@@ -63,8 +87,30 @@ class NeuralNetwork:
                     self.clip_threshold,
                     out=layer.dbiases,
                 )
-            layer.weights -= self.learning_rate * layer.dweights
-            layer.biases -= self.learning_rate * layer.dbiases
+
+            # Adam optimizer
+            layer.vw = self.beta1 * layer.vw + (1 - self.beta1) * layer.dweights
+            layer.vb = self.beta1 * layer.vb + (1 - self.beta1) * layer.dbiases
+
+            layer.sw = self.beta2 * layer.sw + (1 - self.beta2) * (layer.dweights**2)
+            layer.sb = self.beta2 * layer.sb + (1 - self.beta2) * (layer.dbiases**2)
+
+            vw_corrected = layer.vw / (1 - self.beta1)
+            vb_corrected = layer.vb / (1 - self.beta1)
+
+            sw_corrected = layer.sw / (1 - self.beta2)
+            sb_corrected = layer.sb / (1 - self.beta2)
+
+            layer.weights -= (
+                self.learning_rate
+                * vw_corrected
+                / (np.sqrt(sw_corrected) + self.epsilon)
+            )
+            layer.biases -= (
+                self.learning_rate
+                * vb_corrected
+                / (np.sqrt(sb_corrected) + self.epsilon)
+            )
 
     def train(self, x, y):
         losses = []
@@ -88,10 +134,7 @@ class NeuralNetwork:
                 output = self.forward(batch_x)
 
                 # Backward pass with gradient clipping
-                self.backward(
-                    batch_x,
-                    batch_y.reshape(-1, 1),
-                )
+                self.backward(batch_x, batch_y.reshape(-1, 1))
 
                 # Compute batch loss
                 batch_loss = np.mean((output - batch_y.reshape(-1, 1)) ** 2)
@@ -138,4 +181,3 @@ class NeuralNetwork:
 
         print("\nAccuracy:")
         print(f"{accuracy:.2f} %")
-        
