@@ -12,7 +12,6 @@ class Layer:
         self.biases = np.zeros(output_size)
         self.activation = activation
 
-
         ################################################################
         self.dweights = None
         self.dbiases = None
