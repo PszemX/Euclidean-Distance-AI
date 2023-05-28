@@ -1,22 +1,22 @@
-"""
-Ten kod zawiera aktualnie najlepszą wersję dla 1 warstwy.
-"""
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 
 # Generate training data
-num_samples = 1000
-x = np.random.randint(0, 20, size=(num_samples, 2))
-y = np.sum(x, axis=1)
+num_samples = 10000
+x = np.random.randint(-100, 100, size=(num_samples, 4))  # [x1, y2, x2, y2]
+y = np.array(
+    [np.linalg.norm(np.array((xy[0], xy[1])) - np.array((xy[2], xy[3]))) for xy in x]
+)
 
 # Initialize neural network
-input_size = 2
-hidden_size = 512
+input_size = 4
+hidden_size = 1024
 output_size = 1
-learning_rate = 0.001
+learning_rate = 0.01
 epochs = 3000
+beta1 = 0.9
+beta2 = 0.999
+epsilon = 1e-8
 
 
 class Layer:
@@ -25,6 +25,10 @@ class Layer:
             2 / input_size
         )
         self.biases = np.zeros(output_size)
+        self.m_weights = np.zeros_like(self.weights)
+        self.v_weights = np.zeros_like(self.weights)
+        self.m_biases = np.zeros_like(self.biases)
+        self.v_biases = np.zeros_like(self.biases)
 
     def forward(self, X):
         self.input = X
@@ -36,11 +40,23 @@ class Layer:
         d_biases = np.sum(d_output, axis=0)
 
         # Gradient clipping
-        max_grad = 5.0
+        max_grad = 1.0
         d_weights = np.clip(d_weights, -max_grad, max_grad)
 
-        self.weights -= learning_rate * d_weights
-        self.biases -= learning_rate * d_biases
+        # Adam optimization
+        self.m_weights = beta1 * self.m_weights + (1 - beta1) * d_weights
+        self.v_weights = beta2 * self.v_weights + (1 - beta2) * (d_weights**2)
+        m_weights_hat = self.m_weights / (1 - beta1)
+        v_weights_hat = self.v_weights / (1 - beta2)
+        self.weights -= (
+            learning_rate * m_weights_hat / (np.sqrt(v_weights_hat) + epsilon)
+        )
+
+        self.m_biases = beta1 * self.m_biases + (1 - beta1) * d_biases
+        self.v_biases = beta2 * self.v_biases + (1 - beta2) * (d_biases**2)
+        m_biases_hat = self.m_biases / (1 - beta1)
+        v_biases_hat = self.v_biases / (1 - beta2)
+        self.biases -= learning_rate * m_biases_hat / (np.sqrt(v_biases_hat) + epsilon)
 
 
 class NeuralNetwork:

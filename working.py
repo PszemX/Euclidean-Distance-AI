@@ -9,7 +9,7 @@ y = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 # Initialize neural network
 input_size = 4  # Two points (x1, y1) and (x2, y2)
-hidden_sizes = [128, 256, 512]
+hidden_sizes = [512, 256, 128]
 output_size = 1
 learning_rate = 0.001
 epochs = 1000
