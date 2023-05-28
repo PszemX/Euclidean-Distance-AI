@@ -66,7 +66,7 @@ class ActivationReLU:
 class Layer:
     def __init__(self, input_size, output_size, activation, optimizer=None):
         self.weights = np.random.randn(input_size, output_size) * np.sqrt(
-            2 / input_size
+            1 / input_size
         )
         self.biases = np.zeros(output_size)
         self.activation = activation
@@ -109,7 +109,7 @@ class NeuralNetwork:
 
         # Input layer to first hidden layer
         self.layers.append(
-            Layer(input_size, hidden_sizes[0], ActivationLeakyReLU(), AdamOptimizer())
+            Layer(input_size, hidden_sizes[0], ActivationReLU(), AdamOptimizer())
         )
 
         # Hidden layers with batch normalization
@@ -118,14 +118,14 @@ class NeuralNetwork:
                 Layer(
                     hidden_sizes[i - 1],
                     hidden_sizes[i],
-                    ActivationLeakyReLU(),
+                    ActivationReLU(),
                     AdamOptimizer(),
                 )
             )
 
         # Last hidden layer to output layer
         self.layers.append(
-            Layer(hidden_sizes[-1], output_size, ActivationLeakyReLU(), AdamOptimizer())
+            Layer(hidden_sizes[-1], output_size, ActivationReLU(), AdamOptimizer())
         )
 
     def forward(self, x):
