@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # Generate training data
 num_samples = 1000
-x = np.random.randint(-100, 100, size=(num_samples, 4))
+x = np.random.randint(-1000, 1000, size=(num_samples, 4))
 x1, y1, x2, y2 = x[:, 0], x[:, 1], x[:, 2], x[:, 3]
 y = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
@@ -13,7 +13,7 @@ hidden_sizes = [512, 256, 128]
 output_size = 1
 learning_rate = 0.001
 epochs = 1000
-batch_size = 32
+batch_size = 8
 clip_threshold = 5.0  # Adjust the threshold as needed
 
 
@@ -65,8 +65,8 @@ class ActivationReLU:
 
 class Layer:
     def __init__(self, input_size, output_size, activation, optimizer=None):
-        self.weights = np.random.randn(input_size, output_size) * np.sqrt(
-            1 / input_size
+        self.weights = np.random.randn(input_size, output_size) * (
+            2 / (input_size + output_size)
         )
         self.biases = np.zeros(output_size)
         self.activation = activation
@@ -207,7 +207,7 @@ plt.title("Training Loss")
 plt.show()
 
 # Generate test data
-test_data = np.random.randint(-100, 100, size=(100, 4))
+test_data = np.random.randint(2000, 4000, size=(100, 4))
 test_x1, test_y1, test_x2, test_y2 = (
     test_data[:, 0],
     test_data[:, 1],
@@ -225,6 +225,9 @@ plt.title("Euclidean Distance between Two Points")
 plt.show()
 
 max_diff = 0
+print("Learning rate:", learning_rate)
+print("Batch size:", batch_size)
+print("Clip threshold:", clip_threshold)
 for i, data in enumerate(test_data):
     real_euclidean = np.sqrt(
         (data[2:][0] - data[:2][0]) ** 2 + (data[2:][1] - data[:2][1]) ** 2
