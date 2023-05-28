@@ -33,9 +33,10 @@ class Layer:
 
 
 class NeuralNetwork:
-    def __init__(self):
+    def __init__(self, name="Model"):
         self.layers = []
         self.loss = 0
+        self.name = name
 
     def add(self, layer):
         self.layers.append(layer)
@@ -160,5 +161,6 @@ class NeuralNetwork:
         for i, data in enumerate(x):
             print(f"{data} -> {predicted[i]}")
 
+        print(f"\n{self.name}")
         print("\nAccuracy:")
         print(f"{accuracy:.2f} %")
