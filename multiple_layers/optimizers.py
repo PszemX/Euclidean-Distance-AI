@@ -3,7 +3,7 @@ import numpy as np
 # Adam optimizer
 class Optimizer_Adam:
 # Initialize optimizer - set settings
-    def __init__(self, learning_rate=0.001, decay=0 ,epsilon=1e-8, beta1=0.9, beta2=0.999):
+    def __init__(self, learning_rate=0.001, decay=0, epsilon=1e-8, beta1=0.9, beta2=0.999):
         self.learning_rate = learning_rate
         self.current_learning_rate = self.learning_rate
         self.beta1 = beta1

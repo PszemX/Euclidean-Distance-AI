@@ -48,13 +48,14 @@ class NeuralNetwork:
         clip_threshold=None,
         optimizer=Optimizer_Adam(),
         accuracy=0.1,
+        learning_rate_change_frequency = 10,
     ):
         self.epochs = epochs
         self.batch_size = batch_size
         self.clip_threshold = clip_threshold
         self.optimizer = optimizer
         self.accuracy = accuracy
-
+        self.learning_rate_change_frequency = learning_rate_change_frequency
 
     def countAccuracy(self, predicted, y_real):
         return (
@@ -115,7 +116,7 @@ class NeuralNetwork:
 
                 # Backward pass with gradient clipping
                 self.backward(batch_x, batch_y.reshape(-1, 1))
-
+                
                 # Compute batch loss
                 batch_loss = np.mean((output - batch_y.reshape(-1, 1)) ** 2)
                 epoch_loss += batch_loss
@@ -123,7 +124,7 @@ class NeuralNetwork:
             # Print progress
             loss = epoch_loss / (len(x) // self.batch_size)
             losses.append(loss)
-            if self.epoch % 100 == 0:
+            if self.epoch % self.learning_rate_change_frequency == 0:
                 print(f"Epoch: {self.epoch}, Loss: {loss:.8f}")
 
             # Adjust learning rate (learning rate decay)
