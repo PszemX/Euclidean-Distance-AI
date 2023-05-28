@@ -9,17 +9,17 @@ from model import Layer, NeuralNetwork
 def configure_model(model, input):
     # Add layers
     model.add(Layer(input_size=input, output_size=512, activation=ActivationReLU()))
-    model.add(Layer(input_size=512, output_size=1, activation=ActivationReLU()))
-    #model.add(Layer(input_size=256, output_size=128, activation=ActivationReLU()))
-    #model.add(Layer(input_size=128, output_size=1, activation=ActivationReLU()))
+    model.add(Layer(input_size=512, output_size=256, activation=ActivationReLU()))
+    model.add(Layer(input_size=256, output_size=128, activation=ActivationReLU()))
+    model.add(Layer(input_size=128, output_size=1, activation=ActivationReLU()))
     #model.add(Layer(input_size=256, output_size=512, activation=ActivationReLU()))
     #model.add(Layer(input_size=512, output_size=256, activation=ActivationReLU()))
     #model.add(Layer(input_size=256, output_size=128, activation=ActivationReLU()))
     #model.add(Layer(input_size=128, output_size=1, activation=ActivationReLU()))
 
     # Configure and finilize model
-    model.configureTraining(epochs=1000, batch_size=32, clip_threshold=5.0, accuracy=0.1, learning_rate_change_frequency=20,
-                        optimizer=Optimizer_Adam(learning_rate=0.001, decay=1, beta1=0.9, beta2=0.999))
+    model.configureTraining(epochs=1000, batch_size=64, clip_threshold=5.0, accuracy=0.1, learning_rate_change_frequency=20,
+                        optimizer=Optimizer_Adam(learning_rate=0.001, decay=0, beta1=0.9, beta2=0.999))
 
 def sum_model():
     # Generate data
