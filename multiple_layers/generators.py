@@ -45,6 +45,10 @@ class Generator:
             results = self.multiplication(points=points)
         if type == "addition":
             results = self.addition(points=points)
+        if type == "power":
+            results = self.power(points=points)
+        if type == "sqrt":
+            results = self.sqrt(points=points)
 
         # Podział listy punktów i wyników na część treningową i testową.
         x_train, x_test = split_list(list=points, percentage=self.train_percentage)
@@ -84,18 +88,18 @@ class Generator:
         """
         pass
 
-    def GenPower(self, points):
+    def power(self, points):
         """
         Funkcja generuje punkty o większej sile dla każdej klasy w zbiorze treningowym i testowym.
         :param points: Lista punktów do przetworzenia.
         :return: ?.
         """
-        pass
+        return np.array([np.power(xy, 2)] for xy in points)
 
-    def GenSquare(self, points):
+    def sqrt(self, points):
         """
         Funkcja generuje punkty o większym kwadracie dla każdej klasy w zbiorze treningowym i testowym.
         :param points: Lista punktów do przetworzenia.
         :return: ?.
         """
-        pass
+        return np.array([np.sqrt(xy)] for xy in points)
