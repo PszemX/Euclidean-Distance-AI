@@ -11,25 +11,28 @@ class Optimizer_Adam:
         self.epsilon = epsilon
         self.decay = decay
         self.iterations = 0
+        self.t = 0
 
     # Call once before any parameter updates
     def pre_update_params(self):
+        self.learning_rate *= 0.1
         if self.decay:
             self.current_learning_rate = self.learning_rate * \
             (1. / (1. + self.decay * self.iterations))
 
     def update_layer(self, layer):
+        self.t += 1
         layer.vw = self.beta1 * layer.vw + (1 - self.beta1) * layer.dweights
         layer.vb = self.beta1 * layer.vb + (1 - self.beta1) * layer.dbiases
 
         layer.sw = self.beta2 * layer.sw + (1 - self.beta2) * (layer.dweights**2)
         layer.sb = self.beta2 * layer.sb + (1 - self.beta2) * (layer.dbiases**2)
 
-        vw_corrected = layer.vw / (1 - self.beta1)
-        vb_corrected = layer.vb / (1 - self.beta1)
+        vw_corrected = layer.vw / (1 - self.beta1**self.t)
+        vb_corrected = layer.vb / (1 - self.beta1**self.t)
 
-        sw_corrected = layer.sw / (1 - self.beta2)
-        sb_corrected = layer.sb / (1 - self.beta2)
+        sw_corrected = layer.sw / (1 - self.beta2**self.t)
+        sb_corrected = layer.sb / (1 - self.beta2**self.t)
 
         layer.weights -= (
             self.current_learning_rate

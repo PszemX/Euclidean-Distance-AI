@@ -93,6 +93,7 @@ class NeuralNetwork:
             # Update parameters by optimizer
             self.optimizer.update_layer(layer)
 
+
     def train(self, x, y):
         losses = []
 
