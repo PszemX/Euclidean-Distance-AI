@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # Generate training data
 num_samples = 1000
-x = np.random.randint(-1000, 1000, size=(num_samples, 4))
+x = np.random.randint(-100, 100, size=(num_samples, 4))
 x1, y1, x2, y2 = x[:, 0], x[:, 1], x[:, 2], x[:, 3]
 y = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
@@ -12,7 +12,7 @@ input_size = 4  # Two points (x1, y1) and (x2, y2)
 hidden_sizes = [512, 256, 128]
 output_size = 1
 learning_rate = 0.001
-epochs = 1200
+epochs = 400
 batch_size = 32
 clip_threshold = 5.0  # Adjust the threshold as needed
 
@@ -162,7 +162,7 @@ plt.title("Training Loss")
 plt.show()
 
 # Generate test data
-test_data = np.random.randint(1000,2000, size=(100, 4))
+test_data = np.random.randint(-200,200, size=(100, 4))
 test_x1, test_y1, test_x2, test_y2 = test_data[:, 0], test_data[:, 1], test_data[:, 2], test_data[:, 3]
 predicted_distances = model.forward(test_data).flatten()
 

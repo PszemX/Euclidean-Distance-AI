@@ -45,7 +45,7 @@ class NeuralNetwork:
         self,
         epochs=1000,
         batch_size=None,
-        clip_threshold=None,
+        clip_threshold=5.0,
         optimizer=Optimizer_Adam(),
         accuracy=0.1,
         learning_rate_change_frequency = 10,
@@ -124,11 +124,11 @@ class NeuralNetwork:
             # Print progress
             loss = epoch_loss / (len(x) // self.batch_size)
             losses.append(loss)
-            if self.epoch % self.learning_rate_change_frequency == 0:
+            if self.epoch % 100 == 0:
                 print(f"Epoch: {self.epoch}, Loss: {loss:.8f}")
 
             # Adjust learning rate (learning rate decay)
-            if (self.epoch + 1) % 10 == 0:
+            if (self.epoch + 1) % self.learning_rate_change_frequency  == 0:
                 self.optimizer.pre_update_params()
                 self.optimizer.post_update_params()
 
