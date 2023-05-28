@@ -19,8 +19,8 @@ model.add(Layer(input_size=256, output_size=128, activation=ActivationReLU()))
 model.add(Layer(input_size=128, output_size=1, activation=ActivationReLU()))
 
 # Configure and finilize model
-model.configureTraining(epochs=600, batch_size=128, clip_threshold=10.0, learning_rate=0.001, accuracy=0.1, 
-                        optimizer=Optimizer_Adam(learning_rate=0.001, beta1=0.9, beta2=0.999))
+model.configureTraining(epochs=600, batch_size=128, clip_threshold=5.0, accuracy=0.1, 
+                        optimizer=Optimizer_Adam(learning_rate=0.001, decay=1, beta1=0.9, beta2=0.999))
 
 # Train model
 model.train(x=x_train, y=y_train)

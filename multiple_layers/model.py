@@ -12,6 +12,7 @@ class Layer:
         self.biases = np.zeros(output_size)
         self.activation = activation
 
+
         ################################################################
         self.dweights = None
         self.dbiases = None
@@ -43,14 +44,12 @@ class NeuralNetwork:
     def configureTraining(
         self,
         epochs=1000,
-        learning_rate=0.0001,
         batch_size=None,
         clip_threshold=None,
-        optimizer=None,
+        optimizer=Optimizer_Adam(),
         accuracy=0.1,
     ):
         self.epochs = epochs
-        self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.clip_threshold = clip_threshold
         self.optimizer = optimizer
@@ -128,8 +127,9 @@ class NeuralNetwork:
                 print(f"Epoch: {self.epoch}, Loss: {loss:.8f}")
 
             # Adjust learning rate (learning rate decay)
-            if (self.epoch + 1) % 200 == 0:
-                self.learning_rate *= 0.1
+            if (self.epoch + 1) % 10 == 0:
+                self.optimizer.pre_update_params()
+                self.optimizer.post_update_params()
 
             # Check for NaN loss
             if np.isnan(loss):
