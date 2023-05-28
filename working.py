@@ -17,6 +17,28 @@ batch_size = 32
 clip_threshold = 5.0  # Adjust the threshold as needed
 
 
+# Adam optimizer
+class AdamOptimizer:
+    def __init__(self, beta1=0.9, beta2=0.999, epsilon=1e-8):
+        self.beta1 = beta1
+        self.beta2 = beta2
+        self.epsilon = epsilon
+        self.t = 0
+
+    def update(self, weights, gradients, m, v):
+        self.t += 1
+
+        m = self.beta1 * m + (1 - self.beta1) * gradients
+        v = self.beta2 * v + (1 - self.beta2) * (gradients**2)
+
+        m_hat = m / (1 - self.beta1**self.t)
+        v_hat = v / (1 - self.beta2**self.t)
+
+        weights -= learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
+
+        return weights, m, v
+
+
 class ActivationLeakyReLU:
     def forward(self, input):
         self.input = input
@@ -42,7 +64,7 @@ class ActivationReLU:
 
 
 class Layer:
-    def __init__(self, input_size, output_size, activation):
+    def __init__(self, input_size, output_size, activation, optimizer=None):
         self.weights = np.random.randn(input_size, output_size) * np.sqrt(
             2 / input_size
         )
@@ -50,14 +72,11 @@ class Layer:
         self.activation = activation
         self.dweights = None
         self.dbiases = None
+        self.optimizer = optimizer
         self.m_weights = np.zeros_like(self.weights)
         self.v_weights = np.zeros_like(self.weights)
         self.m_biases = np.zeros_like(self.biases)
         self.v_biases = np.zeros_like(self.biases)
-        self.beta1 = 0.9
-        self.beta2 = 0.999
-        self.epsilon = 1e-8
-        self.t = 0
 
     def forward(self, x):
         self.input = x
@@ -68,35 +87,17 @@ class Layer:
         dinputs = self.activation.backward(dvalues)
         self.dweights = np.dot(self.input.T, dinputs)
         self.dbiases = np.sum(dinputs, axis=0)
-        self.t += 1
 
-        # Update biased first and second moments
-        self.m_weights = self.beta1 * self.m_weights + (1 - self.beta1) * self.dweights
-        self.v_weights = self.beta2 * self.v_weights + (1 - self.beta2) * (
-            self.dweights**2
-        )
-        self.m_biases = self.beta1 * self.m_biases + (1 - self.beta1) * self.dbiases
-        self.v_biases = self.beta2 * self.v_biases + (1 - self.beta2) * (
-            self.dbiases**2
-        )
-
-        # Bias correction
-        m_weights_corrected = self.m_weights / (1 - self.beta1**self.t)
-        v_weights_corrected = self.v_weights / (1 - self.beta2**self.t)
-        m_biases_corrected = self.m_biases / (1 - self.beta1**self.t)
-        v_biases_corrected = self.v_biases / (1 - self.beta2**self.t)
-
-        # Update weights and biases
-        self.weights -= (
-            learning_rate
-            * m_weights_corrected
-            / (np.sqrt(v_weights_corrected) + self.epsilon)
-        )
-        self.biases -= (
-            learning_rate
-            * m_biases_corrected
-            / (np.sqrt(v_biases_corrected) + self.epsilon)
-        )
+        if self.optimizer:
+            self.weights, self.m_weights, self.v_weights = self.optimizer.update(
+                self.weights, self.dweights, self.m_weights, self.v_weights
+            )
+            self.biases, self.m_biases, self.v_biases = self.optimizer.update(
+                self.biases, self.dbiases, self.m_biases, self.v_biases
+            )
+        else:
+            self.weights -= learning_rate * self.dweights
+            self.biases -= learning_rate * self.dbiases
 
         return np.dot(dinputs, self.weights.T)
 
@@ -107,16 +108,25 @@ class NeuralNetwork:
         self.layers = []
 
         # Input layer to first hidden layer
-        self.layers.append(Layer(input_size, hidden_sizes[0], ActivationLeakyReLU()))
+        self.layers.append(
+            Layer(input_size, hidden_sizes[0], ActivationLeakyReLU(), AdamOptimizer())
+        )
 
         # Hidden layers with batch normalization
         for i in range(1, len(hidden_sizes)):
             self.layers.append(
-                Layer(hidden_sizes[i - 1], hidden_sizes[i], ActivationLeakyReLU())
+                Layer(
+                    hidden_sizes[i - 1],
+                    hidden_sizes[i],
+                    ActivationLeakyReLU(),
+                    AdamOptimizer(),
+                )
             )
 
         # Last hidden layer to output layer
-        self.layers.append(Layer(hidden_sizes[-1], output_size, ActivationLeakyReLU()))
+        self.layers.append(
+            Layer(hidden_sizes[-1], output_size, ActivationLeakyReLU(), AdamOptimizer())
+        )
 
     def forward(self, x):
         for layer in self.layers:
@@ -141,8 +151,6 @@ class NeuralNetwork:
                         clip_threshold,
                         out=layer.dbiases,
                     )
-                layer.weights -= learning_rate * layer.dweights
-                layer.biases -= learning_rate * layer.dbiases
 
 
 # Training loop
