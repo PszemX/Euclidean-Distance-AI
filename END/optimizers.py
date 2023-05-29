@@ -9,15 +9,26 @@ class AdamOptimizer:
         self.learning_rate = learning_rate
         self.t = 0
 
-    def update(self, weights, gradients, m, v):
+    def update_optimizer(self, learning_rise_value):
+        self.learning_rate *= learning_rise_value
+
+    def update_layer(self, layer):
         self.t += 1
 
-        m = self.beta1 * m + (1 - self.beta1) * gradients
-        v = self.beta2 * v + (1 - self.beta2) * (gradients**2)
+        # Weights
+        layer.m_weights = self.beta1 * layer.m_weights + (1 - self.beta1) * layer.dweights
+        layer.v_weights = self.beta2 * layer.v_weights + (1 - self.beta2) * (layer.dweights**2)
 
-        m_hat = m / (1 - self.beta1**self.t)
-        v_hat = v / (1 - self.beta2**self.t)
+        m_hat = layer.m_weights / (1 - self.beta1**self.t)
+        v_hat = layer.v_weights / (1 - self.beta2**self.t)
 
-        weights -= self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
+        layer.weights -= self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
 
-        return weights, m, v
+        # Biases
+        layer.m_biases = self.beta1 * layer.m_biases + (1 - self.beta1) * layer.dbiases
+        layer.v_biases = self.beta2 * layer.v_biases + (1 - self.beta2) * (layer.dbiases**2)
+
+        m_hatb = layer.m_biases / (1 - self.beta1**self.t)
+        v_hatb = layer.v_biases / (1 - self.beta2**self.t)
+
+        layer.biases -= self.learning_rate * m_hatb / (np.sqrt(v_hatb) + self.epsilon)

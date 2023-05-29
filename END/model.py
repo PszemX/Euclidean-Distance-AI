@@ -5,7 +5,7 @@ from generators import *
 from activations import *
 
 class Layer:
-    def __init__(self, input_size, output_size, activation, optimizer=None):
+    def __init__(self, input_size, output_size, activation):
         self.weights = np.random.randn(input_size, output_size) * (
             2 / (input_size + output_size)
         )
@@ -13,7 +13,6 @@ class Layer:
         self.activation = activation
         self.dweights = None
         self.dbiases = None
-        self.optimizer = optimizer
         self.m_weights = np.zeros_like(self.weights)
         self.v_weights = np.zeros_like(self.weights)
         self.m_biases = np.zeros_like(self.biases)
@@ -24,23 +23,13 @@ class Layer:
         self.output = np.dot(self.input, self.weights) + self.biases
         return self.activation.forward(self.output)
 
-    def backward(self, dvalues):
-        dinputs = self.activation.backward(dvalues)
-        self.dweights = np.dot(self.input.T, dinputs)
-        self.dbiases = np.sum(dinputs, axis=0)
-
-        if self.optimizer:
-            self.weights, self.m_weights, self.v_weights = self.optimizer.update(
-                self.weights, self.dweights, self.m_weights, self.v_weights
-            )
-            self.biases, self.m_biases, self.v_biases = self.optimizer.update(
-                self.biases, self.dbiases, self.m_biases, self.v_biases
-            )
-        else:
-            self.weights -= learning_rate * self.dweights
-            self.biases -= learning_rate * self.dbiases
-
-        return np.dot(dinputs, self.weights.T)
+    def backward_prepare(self, dvalues):
+        self.dinputs = self.activation.backward(dvalues)
+        self.dweights = np.dot(self.input.T, self.dinputs)
+        self.dbiases = np.sum(self.dinputs, axis=0)
+    
+    def backward_update(self):
+        return np.dot(self.dinputs, self.weights.T)
 
 
 class NeuralNetwork:
@@ -55,14 +44,18 @@ class NeuralNetwork:
         epochs=1000,
         batch_size=None,
         clip_threshold=5.0,
-        optimizer=AdamOptimizer(),
-        learning_rate=0.001
+        optimizer=None,
+        learning_rate=0.001,
+        learning_rise_interval = 200,
+        learning_rise_value = 0.1
     ):
         self.epochs = epochs
         self.batch_size = batch_size
         self.clip_threshold = clip_threshold
         self.optimizer = optimizer
         self.learning_rate = learning_rate
+        self.learning_rise_interval = learning_rise_interval
+        self.learning_rise_value = learning_rise_value
 
     def forward(self, x):
         for layer in self.layers:
@@ -72,7 +65,13 @@ class NeuralNetwork:
     def backward(self, y):
         dvalues = 2 * (self.layers[-1].output - y) / y.size
         for layer in reversed(self.layers):
-            dvalues = layer.backward(dvalues)
+            layer.backward_prepare(dvalues)
+            if self.optimizer:
+                self.optimizer.update_layer(layer=layer)
+            else:
+                self.weights -= learning_rate * self.dweights
+                self.biases -= learning_rate * self.dbiases
+            dvalues = layer.backward_update()
             if isinstance(layer, Layer):
                 if self.clip_threshold is not None:
                     np.clip(
@@ -87,6 +86,7 @@ class NeuralNetwork:
                         self.clip_threshold,
                         out=layer.dbiases,
                     )
+
 
     def train(self, x, y):
         losses = []
@@ -106,9 +106,8 @@ class NeuralNetwork:
                 # Forward pass
                 output = self.forward(batch_x)
 
-                # Backward pass with gradient clipping
-                self.backward(batch_y.reshape(-1, 1),
-)
+                # Backward pass with gradient clipping and parameter optimization
+                self.backward(batch_y.reshape(-1, 1))
 
                 # Compute batch loss
                 batch_loss = np.mean((output - batch_y.reshape(-1, 1)) ** 2)
@@ -121,8 +120,11 @@ class NeuralNetwork:
                 print(f"Epoch: {epoch}, Loss: {loss:.8f}")
 
             # Adjust learning rate (learning rate decay)
-            if (epoch + 1) % 200 == 0:
-                learning_rate *= 0.1
+            if (epoch + 1) % self.learning_rise_interval == 0:
+                if self.optimizer is not None:
+                    self.optimizer.update_optimizer(self.learning_rise_value)
+                else: 
+                    learning_rate *= 0.1
 
             # Check for NaN loss
             if np.isnan(loss):

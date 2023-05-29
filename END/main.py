@@ -14,11 +14,18 @@ x_train, y_train, x_test, y_test = generator.generate(size=1000, min_range=-50, 
 model = NeuralNetwork()
 
 # Configure model
-model.configure(epochs=100, batch_size=32, clip_threshold=5.0, optimizer=AdamOptimizer(), learning_rate=0.001) 
-model.addLayer(Layer(input_size=4, output_size=512, activation=ActivationReLU(), optimizer=AdamOptimizer()))
-model.addLayer(Layer(input_size=512, output_size=256, activation=ActivationReLU(), optimizer=AdamOptimizer()))
-model.addLayer(Layer(input_size=256, output_size=128, activation=ActivationReLU(), optimizer=AdamOptimizer()))
-model.addLayer(Layer(input_size=128, output_size=1, activation=ActivationReLU(), optimizer=AdamOptimizer()))
+model.configure(
+                epochs=300, 
+                batch_size=32, 
+                clip_threshold=5.0, 
+                optimizer=AdamOptimizer(learning_rate=0.001),
+                learning_rise_value=0.1, 
+                learning_rise_interval=200
+                ) 
+model.addLayer(Layer(input_size=4, output_size=512, activation=ActivationReLU()))
+model.addLayer(Layer(input_size=512, output_size=256, activation=ActivationReLU()))
+model.addLayer(Layer(input_size=256, output_size=128, activation=ActivationReLU()))
+model.addLayer(Layer(input_size=128, output_size=1, activation=ActivationReLU()))
 
 # Train model
 model.train(x_train, y_train)
