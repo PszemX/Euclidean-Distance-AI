@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Generate training data
-num_samples = 1000
+num_samples = 10000
 x = np.random.randint(-1000, 1000, size=(num_samples, 4))
 x1, y1, x2, y2 = x[:, 0], x[:, 1], x[:, 2], x[:, 3]
 y = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
@@ -11,7 +11,8 @@ y = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 input_size = 4  # Two points (x1, y1) and (x2, y2)
 hidden_sizes = [512, 256, 128]
 output_size = 1
-learning_rate = 0.001
+initial_lr = 0.001
+learning_rate = initial_lr
 epochs = 1000
 batch_size = 8
 clip_threshold = 5.0  # Adjust the threshold as needed
@@ -225,9 +226,6 @@ plt.title("Euclidean Distance between Two Points")
 plt.show()
 
 max_diff = 0
-print("Learning rate:", learning_rate)
-print("Batch size:", batch_size)
-print("Clip threshold:", clip_threshold)
 for i, data in enumerate(test_data):
     real_euclidean = np.sqrt(
         (data[2:][0] - data[:2][0]) ** 2 + (data[2:][1] - data[:2][1]) ** 2
@@ -236,4 +234,7 @@ for i, data in enumerate(test_data):
     if difference > max_diff:
         max_diff = difference
     print(f"{data[:2]}, {data[2:]} -> {predicted_distances[i]} (Diff: ~{difference})")
+print("Learning rate:", initial_lr)
+print("Batch size:", batch_size)
+print("Clip threshold:", clip_threshold)
 print(f"Max difference: {max_diff}")
