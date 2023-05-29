@@ -33,7 +33,11 @@ class Generator:
         :return: Tuple dwóch par list: pierwsza zawiera punkty treningowe x_train i odpowiadające im wyniki y_train, a druga - testowe x_test i y_test.
         """
         # Generowanie losowych punktów.
-        points = np.random.randint(min_range, max_range, size=(size, self.dimensions))
+        if type == 'euklides':
+            points = np.random.randint(min_range, max_range, size=(size, self.dimensions * 2))
+        else:
+            points = np.random.randint(min_range, max_range, size=(size, self.dimensions))
+
         results = []
 
         # Wybór rodzaju operacji i wykonanie jej.
@@ -49,12 +53,19 @@ class Generator:
             results = self.power(points=points)
         if type == "sqrt":
             results = self.sqrt(points=points)
+        if type == "euklides":
+            results = self.euklides(points=points)
 
         # Podział listy punktów i wyników na część treningową i testową.
         x_train, x_test = split_list(list=points, percentage=self.train_percentage)
         y_train, y_test = split_list(list=results, percentage=self.train_percentage)
 
         return x_train, y_train, x_test, y_test
+
+    def euklides(self, points):
+        x1, y1, x2, y2 = points[:, 0], points[:, 1], points[:, 2], points[:, 3]
+        return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+        
 
     def substract(self, points):
         """
